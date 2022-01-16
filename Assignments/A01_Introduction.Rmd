@@ -1,6 +1,6 @@
 ---
 title: "Assignment 1: Introduction"
-author: "Student Name"
+author: "Michael Gaffney"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -23,20 +23,23 @@ The completed exercise is due on <>.
 1. What are your previous experiences with data analytics, R, and Git? Include both formal and informal training.
 
 > Answer: 
+I have worked with R in the 710 class here at the Nicholas School, and so I have some experience with it. In terms of git, I have worked with it before in advanced GIS. Both of those classes represent the extent of my knowledge of environmental data analytics (although I have also done some analysis for my MP).
 
 2. Are there any components of the course about which you feel confident?
 
-> Answer: 
+> Answer:
+I feel relatively confident in my understanding of R, and in coding in general.
 
 3. Are there any components of the course about which you feel apprehensive?
 
 > Answer: 
+Although I understand the purpose and concept of Git, there do seem to be a few things that can go wrong with it.
 
 
 ## 2) GitHub
 
 Provide a link below to your forked course repository in GitHub. Make sure you have pulled all recent changes from the course repository  and that you have updated your course README file. 
 
-> Answer: 
+> Answer: https://github.com/mtgaffney/Environmental_Data_Analytics_2022
 
 
