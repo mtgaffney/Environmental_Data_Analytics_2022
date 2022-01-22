@@ -55,7 +55,7 @@ Note: each of these approaches utilize the package "ggplot2". We will be coverin
 
 ### Bar Chart (function: geom_bar)
 
-Visualize count data for categorical variables. 
+Visualize count data for categorical variables. Bar part is useful for categorical variables and counts.
 
 ```{r, fig.height = 3, fig.width = 4}
 ggplot(USGS.flow.data, aes(x = discharge.mean.approval)) +
@@ -67,7 +67,7 @@ ggplot(USGS.flow.data, aes(x = discharge.mean.approval)) +
 Visualize distributions of values for continuous numerical variables. What is happening in each line of code? Insert a comment above each line.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+#creates a histrogram of the charage mean values
 ggplot(USGS.flow.data) +
   geom_histogram(aes(x = discharge.mean))
 
@@ -98,11 +98,13 @@ An alternate to a histogram is a frequency polygon graph (distributions of value
 ggplot(USGS.flow.data) +
   geom_freqpoly(aes(x = gage.height.mean), bins = 50) +
   geom_freqpoly(aes(x = gage.height.min), bins = 50, color = "darkgray") +
+  #lty is line type for dashed line
   geom_freqpoly(aes(x = gage.height.max), bins = 50,  lty = 2) +
   scale_x_continuous(limits = c(0, 10))
 
 #
 ggplot(USGS.flow.data) +
+  #color by mean approval, which is categorical
   geom_freqpoly(aes(x = gage.height.mean, color = gage.height.mean.approval), bins = 50) +
   scale_x_continuous(limits = c(0, 10)) +
   theme(legend.position = "top")
@@ -123,7 +125,7 @@ A box-and-whisker plot is yet another alternative to histograms (distributions o
 An alternate option is a violin plot, which displays density distributions, somewhat like a hybrid of the box-and-whiskers and the frequency polygon plot.
 
 ```{r, fig.height = 3, fig.width = 4}
-#
+#mean gage height values subsetted by approval
 ggplot(USGS.flow.data) +
   geom_boxplot(aes(x = gage.height.mean.approval, y = gage.height.mean))
 
@@ -138,7 +140,7 @@ ggplot(USGS.flow.data) +
 ```
 
 ### Scatterplot (function: geom_point)
-Visualize relationships between continuous numerical variables.
+Visualize relationships between continuous numerical variables.This is different from looking at distribtuions within variables, which is more or less what we've been doing before this.
 
 ```{r, fig.height = 3, fig.width = 4}
 ggplot(USGS.flow.data) +
