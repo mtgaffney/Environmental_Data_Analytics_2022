@@ -52,21 +52,22 @@ a > b
 8. Label the columns of your data frame with informative titles.
 
 ```{r}
-#character vector
+#character vector of student names
 students <- c("Matthew", "Mark", "Luke", "John")
-#numerical vector
+#numerical vector of scores
 scores <- c(95, 76, 49, 85)
-#logical vector
+#logical vector of pass fail
 passed <- c(TRUE, TRUE, FALSE, TRUE)
 #create grades dataframe
-grades <- data.frame("name" = students, "score" = scores, "passed" = passed)
+grades <- data.frame("name" = students, "score" = scores, "pass/fail" = passed)
+print(grades)
 
 ```
 
 9. QUESTION: How is this data frame different from a matrix?
 
 > Answer: 
-They're similiar, but a matrix can only store one type of data (like numeric), where a dataframe can store multiple forms of data.
+They're similiar, but a matrix can only store one type of data (like numeric, for example), where a dataframe can store multiple forms of data.
 
 10. Create a function with an if/else statement. Your function should determine whether a test score is a passing grade of 50 or above (TRUE or FALSE). You will need to choose either the `if` and `else` statements or the `ifelse` statement. Hint: Use `print`, not `return`. The name of your function should be informative.
 
@@ -74,7 +75,7 @@ They're similiar, but a matrix can only store one type of data (like numeric), w
 
 ```{r}
 passing <- function(x){
-  y <- ifelse(x>50,TRUE,FALSE)
+  y <- ifelse(x>=50,TRUE,FALSE)
   print(y)
 }
 
@@ -84,4 +85,4 @@ passing(grades$score)
 12. QUESTION: Which option of `if` and `else` vs. `ifelse` worked? Why?
 
 > Answer: 
-I used ifelse becuase the outcome I needed for the scores was binary--if it's above 50, then it's true, and if it's below, it's false. The ifelse function is the simplest way to create this output. 
+I used ifelse becuase the outcome I needed for the scores was binary--if it's above 50, then it's true, and if it's below, it's false. The ifelse function is the simplest and most efficient way to create this output. 
