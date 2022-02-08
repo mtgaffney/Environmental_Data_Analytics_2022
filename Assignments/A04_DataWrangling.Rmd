@@ -1,6 +1,6 @@
 ---
 title: "Assignment 4: Data Wrangling"
-author: "Student Name"
+author: "Michael Gaffney"
 output: pdf_document
 geometry: margin=2.54cm
 ---
@@ -25,8 +25,19 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 
 ```{r, message = FALSE}
 #1
-
-#2
+library(tidyverse)
+library(lubridate)
+getwd()
+#import data
+EPA.O3.2018 <- read.csv("../Data/Raw/EPAair_O3_NC2018_raw.csv", stringsAsFactors = TRUE)
+EPA.O3.2019 <- read.csv("../Data/Raw/EPAair_O3_NC2019_raw.csv", stringsAsFactors = TRUE)
+EPA.PM25.2018 <- read.csv("../Data/Raw/EPAair_PM25_NC2018_raw.csv", stringsAsFactors = TRUE)
+EPA.PM25.2019 <- read.csv("../Data/Raw/EPAair_PM25_NC2019_raw.csv", stringsAsFactors = TRUE)
+#2 explore dimensions, column names, and strucutre for each dataset.
+dim(EPA.O3.2018); colnames(EPA.O3.2018); str(EPA.O3.2018)
+dim(EPA.O3.2019); colnames(EPA.O3.2019); str(EPA.O3.2019)
+dim(EPA.PM25.2018); colnames(EPA.PM25.2018); str(EPA.PM25.2018)
+dim(EPA.PM25.2019); colnames(EPA.PM25.2019); str(EPA.PM25.2019)
 ```
 
 ## Wrangle individual datasets to create processed files.
@@ -36,13 +47,25 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 6. Save all four processed datasets in the Processed folder. Use the same file names as the raw files but replace "raw" with "processed".
 
 ```{r}
-#3
+#3 change to date object for all four datasets
+EPA.O3.2018$Date <- as.Date(EPA.O3.2018$Date, format = "%m/%d/%Y")
+EPA.O3.2019$Date <- as.Date(EPA.O3.2019$Date, format = "%m/%d/%Y")
+EPA.PM25.2018$Date <- as.Date(EPA.PM25.2018$Date, format = "%m/%d/%Y")
+EPA.PM25.2019$Date <- as.Date(EPA.PM25.2019$Date, format = "%m/%d/%Y")
+#4 select out certain columns and create new datasets
+EPA.O3.2018.Selected <- select(EPA.O3.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+EPA.O3.2019.Selected <- select(EPA.O3.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+EPA.PM25.2018.Selected <- select(EPA.PM25.2018, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+EPA.PM25.2019.Selected <- select(EPA.PM25.2019, Date, DAILY_AQI_VALUE, Site.Name, AQS_PARAMETER_DESC, COUNTY, SITE_LATITUDE, SITE_LONGITUDE)
+#5 Replace AQS Parameter values
+EPA.PM25.2018.Selected$AQS_PARAMETER_DESC <- "PM2.5"
+EPA.PM25.2019.Selected$AQS_PARAMETER_DESC <- "PM2.5"
 
-#4
-
-#5
-
-#6
+#6 Save processed datasets as csv files
+write.csv(EPA.O3.2018.Selected, row.names = FALSE, file = "../Data/Processed/EPAair_O3_NC2018_processed.csv")
+write.csv(EPA.O3.2019.Selected, row.names = FALSE, file = "../Data/Processed/EPAair_O3_NC2019_processed.csv")
+write.csv(EPA.PM25.2018.Selected, row.names = FALSE, file = "../Data/Processed/EPAair_PM25_NC2018_processed.csv")
+write.csv(EPA.PM25.2019.Selected, row.names = FALSE, file = "../Data/Processed/EPAair_PM25_NC2019_processed.csv")
 
 ```
 
@@ -61,16 +84,28 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 11. Save your processed dataset with the following file name: "EPAair_O3_PM25_NC2122_Processed.csv"
 
 ```{r}
-#7
+#7 Combine all four datasets
+EPA.Combined <- rbind(EPA.O3.2018.Selected, EPA.O3.2019.Selected, EPA.PM25.2018.Selected, EPA.PM25.2019.Selected)
 
 #8
+EPA.Combined.Filtered <- 
+  EPA.Combined %>% 
+  filter(Site.Name %in% c("Linville Falls", "Durham Armory", "Leggett", "Hattie Avenue", "Clemmons Middle", "Mendenhall School", "Frying Pan Mountain", "West Johnston Co.", "Garinger High School", "Castle Hayne", "Pitt Agri. Center", "Bryson City", "Millbrook School")) %>% 
+  group_by(Date, Site.Name, AQS_PARAMETER_DESC, COUNTY) %>% 
+  summarise(MeanAQI = mean(DAILY_AQI_VALUE),
+            Latitude = mean(SITE_LATITUDE),
+            Longitude = mean(SITE_LONGITUDE)) %>%
+  mutate(Month = month(Date)) %>%
+  mutate(Year = year(Date))
 
-#9
+#9 spread data with pivot wider AQI values for Ozone and PM25 in separate columns
+EPA.Combined.Spread <- pivot_wider(EPA.Combined.Filtered, names_from = AQS_PARAMETER_DESC, values_from = MeanAQI)
 
 #10
+dim(EPA.Combined.Spread)
 
 #11
-
+write.csv(EPA.Combined.Spread, row.names = FALSE, file = "../Data/Processed/EPAair_O3_PM25_NC2122_Processed.csv")
 ```
 
 
@@ -84,12 +119,16 @@ The completed exercise is due on Monday, Feb 7 @ 7:00pm.
 
 ```{r}
 #12(a,b)
+EPA.Summary <- EPA.Combined.Spread %>% 
+  group_by(Site.Name, Month, Year) %>% 
+  filter(!is.na(Ozone) & !is.na(PM2.5)) %>%
+  summarise(MeanAQI_Ozone = mean(Ozone),
+            MeanAQI_PM2.5 = mean(PM2.5))
 
-
-#13
-
+#13 Call dimensions for 
+dim(EPA.Summary)
 ```
 
 14. Why did we use the function `drop_na` rather than `na.omit`?
 
-> Answer: 
+> Answer: I used the is.na function combined with a not operator ("!") to remove the NAs.

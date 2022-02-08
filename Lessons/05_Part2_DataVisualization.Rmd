@@ -70,6 +70,7 @@ Notice that some aspects of your graph have not been adjusted, including:
 If you would like to set a common theme across all plots in your analysis session, you may define a theme and call up that theme for each graph. This eliminates the need to add multiple lines of code in each plot. 
 
 ```{r, fig.height = 3, fig.width = 4, warning = FALSE}
+#create theme object that can be called for every line of code
 mytheme <- theme_classic(base_size = 14) +
   theme(axis.text = element_text(color = "black"), 
         legend.position = "top") #alternative: legend.position + legend.justification
@@ -81,6 +82,7 @@ O3plot5 <- ggplot(EPAair) +
   mytheme
 print(O3plot5)  
 
+#this code sets the theme globally I think
 theme_set(mytheme)
 
 O3plot6 <- ggplot(EPAair) +
@@ -159,6 +161,7 @@ library(viridis)
 library(RColorBrewer)
 library(colormap)
 
+#explore the color scales
 scales::show_col(colormap(colormap = colormaps$viridis, nshades = 16))
 scales::show_col(colormap(colormap = colormaps$inferno, nshades = 16))
 scales::show_col(colormap(colormap = colormaps$magma, nshades = 16))
@@ -175,7 +178,7 @@ print(NvsP)
 NvsP2 <-
   ggplot(PeterPaul.chem.nutrients, aes(x = tp_ug, y = tn_ug, color = depth, shape = lakename)) +
   geom_point(alpha = 0.7, size = 2.5) +
-  #labs() + # change your legend labels here
+  xlab("TP (Micgrograms per Liter)") + ylab("TN (Micrograms per liter)") +
   scale_shape_manual(values = c(15, 17)) +
   #scale_color_distiller(palette = "Blues", direction = 1) + # use scale_color_brewer for discrete variables
   scale_color_viridis(option = "magma", direction = -1) +
@@ -194,7 +197,7 @@ Nutrientplot <-
   scale_y_continuous(expand = c(0, 0)) +
   #scale_color_brewer(palette = "YlGnBu") +
   #scale_color_manual(values = c("#7fcdbb", "#41b6c4", "#1d91c0", "#225ea8", "#0c2c84")) +
-  #scale_color_viridis(discrete = TRUE, end = 0.8) +
+  scale_color_viridis(discrete = TRUE, end = 0.8) +
   theme(legend.position = "right")
 print(Nutrientplot)
 ```
@@ -234,7 +237,9 @@ The following graph displays the counts of specific endpoints measured in neonic
 ```{r}
 Neonics <- read.csv("./Data/Raw/ECOTOX_Neonicotinoids_Insects_raw.csv")
 ggplot(Neonics) +
-  geom_bar(aes(x = Endpoint))
+  geom_bar(aes(x = reorder(Endpoint, Endpoint, FUN = length))) + 
+  scale_x_discrete(limits = rev(levels(Neonics$Endpoint))) +
+  theme(axis.text.x = element_text(angle = 45))
 
 
 
