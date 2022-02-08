@@ -19,6 +19,7 @@ editor_options:
 The expression function can be used when you want to add mathematical symbols and subscripts mixed with regular letter to labels. 
 
 ```{r}
+library(tidyverse)
 Plot_text <-
 ggplot(data=data.frame(x=0,y=0))+
   geom_point(aes(x=x,y=y)) +
@@ -33,7 +34,6 @@ ggsave("./Output/Plot_text.jpg",Plot_text, height = 4, width = 6, units = "in", 
 
 ```{r, message = FALSE, warning = FALSE}
 getwd()
-library(tidyverse)
 library(ggridges)
 library(viridis)
 library(RColorBrewer)
@@ -59,10 +59,22 @@ Exercise: build your own scatterplots of PeterPaul.chem.nutrients
 # Plot surface temperatures by day of  year. 
 # Color your points by year, and facet by lake in two rows.
 # Change the ylab name
+ggplot(filter(PeterPaul.chem.nutrients, depth == 0)) + 
+  facet_wrap(vars(lakename)) +
+  geom_point(aes(x = daynum, y = temperature_C, color = year4)) +
+  ylab("Temperature(C)")
 
 
 #2. 
 # Plot temperature by date. Color your points by depth.
+ggplot(PeterPaul.chem.nutrients) + 
+  #change sample size
+  geom_point(aes(x = sampledate, y = temperature_C, color = depth), size = 0.5) +
+  scale_color_viridis(option = "magma", direction = -1) +
+  ylab("Temperature(C)") +
+  xlab("Date") +
+  scale_x_date(date_breaks = "5 years", date_labels="%Y")
+  
 # Change the size of your point to 0.5
 # Change the color palette to magma and play with direction (+- 1), which one makes more sense?
 # Change x axis to include marker/labels every 5 years
@@ -79,6 +91,10 @@ Exercise: Plot relationships between air quality measurements
 
 # 3. 
 # Plot AQI values for ozone by PM2.5, colored by latitude 
+ggplot(EPAair, aes(x = PM2.5, y = Ozone, color = meanLat)) +
+  geom_point(alpha = .5) +
+  geom_smooth(lm)
+  
 # Make the points 50 % transparent
 # Add a line of best fit for the linear regression of these variables.
 
