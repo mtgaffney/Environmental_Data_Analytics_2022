@@ -1,6 +1,6 @@
 ---
 title: "Assignment 5: Data Visualization"
-author: "Student Name"
+author: "Michael Gaffney"
 output: pdf_document
 geometry: margin=2.54cm
 editor_options: 
@@ -33,6 +33,8 @@ the processed data file for the Niwot Ridge litter dataset (use the [`NEON_NIWO_
 
 ```{r}
 #1 
+PeterPaul <- read.csv("./data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+
 
 #2 
 
