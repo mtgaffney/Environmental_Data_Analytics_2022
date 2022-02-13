@@ -32,18 +32,36 @@ the processed data file for the Niwot Ridge litter dataset (use the [`NEON_NIWO_
 2. Make sure R is reading dates as date format; if not change the format to date.
 
 ```{r}
-#1 
-PeterPaul <- read.csv("./data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv")
+#1
+#load libraries
+library(tidyverse)
+library(cowplot)
+library(viridis)
+library(RColorBrewer)
+library(colormap)
+PeterPaul <- read.csv("./data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", stringsAsFactors = TRUE)
+Neon <- read.csv("./data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", stringsAsFactors = TRUE)
 
 
-#2 
+#2 Check dates for both datasets
+class(PeterPaul$sampledate)
+class(Neon$sampledate)
+#both read as factors; transform both to dates
+PeterPaul$sampledate <- as.Date(PeterPaul$sampledate, format = "%Y-%m-%d")
+Neon$sampledate <- as.Date(Neon$sampledate, format = "%Y-%m-%d")
+
 
 ```
 ## Define your theme
 3. Build a theme and set it as your default theme.
 
 ```{r}
-#3
+#3 create dark theme variable.
+mytheme <- theme_dark(base_size = 14) +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "top") 
+#set the theme globally
+theme_set(mytheme)
 
 ```
 
@@ -54,15 +72,42 @@ For numbers 4-7, create ggplot graphs and adjust aesthetics to follow best pract
 
 ```{r}
 #4
-
+ggplot(PeterPaul, aes(x = tp_ug, y = po4, color = lakename)) + 
+  #create two side by side graphs with Peter and Paul
+  facet_wrap("lakename") +
+  #remove legend and add points
+  geom_point(show.legend = FALSE) +
+  geom_smooth(method = lm, color = "black") +
+  xlab("Total Phosphorous") +
+  ylab("Phosphate") +
+  ylim (0,50) +
+  scale_color_brewer(palette = "YlGnBu")
 ```
 
 
 5. [NTL-LTER] Make three separate boxplots of (a) temperature, (b) TP, and (c) TN, with month as the x axis and lake as a color aesthetic. Then, create a cowplot that combines the three graphs. Make sure that only one legend is present and that graph axes are aligned.
 
 ```{r}
-#5
+#5 Create three plots
+PeterPaul_Temp <- ggplot(PeterPaul, aes(x = as.factor(month), y = temperature_C, color = lakename)) + 
+  geom_boxplot() +
+  xlab("Month") + ylab("Temperature (C)")
+PeterPaul_TP <- ggplot(PeterPaul, aes(x = as.factor(month), y = tp_ug, color = lakename)) + 
+  geom_boxplot(show.legend = FALSE) +
+  xlab("Month") + ylab("TP")
+PeterPaul_TN <- ggplot(PeterPaul, aes(x = as.factor(month), y = tn_ug, color = lakename)) + 
+  geom_boxplot(show.legend = FALSE) +
+  xlab("Month") + ylab("TN")
 
+#grab the legend
+my.legend <- get_legend(PeterPaul_Temp)
+#now remove legend and replot without the legend
+PeterPaul_Temp <- PeterPaul_Temp + theme(legend.position = "none")
+#plot the grid
+plot_grid(PeterPaul_Temp, PeterPaul_TP, PeterPaul_TN, my.legend, 
+          ncol = 1, align = "vh", axis = "bt", rel_heights = c(1.25, 1))
+
+#plot_grid(PeterPaul_Temp, PeterPaul_Temp, PeterPaul_TN, nrow = 2, align = 'h', rel_heights = c(1.25, 1))
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
