@@ -39,18 +39,16 @@ library(cowplot)
 library(viridis)
 library(RColorBrewer)
 library(colormap)
+setwd("/Users/michaelgaffney/Documents/Duke University/Nicholas School of the Environment/05 Spring 2022/ENVIRON 872 Environmental Data Analytics/Environmental_Data_Analytics_2022")
+#load data
 PeterPaul <- read.csv("./data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", stringsAsFactors = TRUE)
-Neon <- read.csv("./data/Processed/NTL-LTER_Lake_Chemistry_Nutrients_PeterPaul_Processed.csv", stringsAsFactors = TRUE)
-
-
+Litter <- read.csv("./data/Processed/NEON_NIWO_Litter_mass_trap_Processed.csv", stringsAsFactors = TRUE)
 #2 Check dates for both datasets
 class(PeterPaul$sampledate)
-class(Neon$sampledate)
+class(Litter$sampledate)
 #both read as factors; transform both to dates
 PeterPaul$sampledate <- as.Date(PeterPaul$sampledate, format = "%Y-%m-%d")
-Neon$sampledate <- as.Date(Neon$sampledate, format = "%Y-%m-%d")
-
-
+Litter$sampledate <- as.Date(Litter$collectDate, format = "%Y-%m-%d")
 ```
 ## Define your theme
 3. Build a theme and set it as your default theme.
@@ -62,7 +60,6 @@ mytheme <- theme_dark(base_size = 14) +
         legend.position = "top") 
 #set the theme globally
 theme_set(mytheme)
-
 ```
 
 ## Create graphs
@@ -91,40 +88,61 @@ ggplot(PeterPaul, aes(x = tp_ug, y = po4, color = lakename)) +
 #5 Create three plots
 PeterPaul_Temp <- ggplot(PeterPaul, aes(x = as.factor(month), y = temperature_C, color = lakename)) + 
   geom_boxplot() +
-  xlab("Month") + ylab("Temperature (C)")
+  xlab("Month") + ylab("Temperature (C)") +
+  scale_color_manual(values = c("hotpink", "lightgreen")) +
+  labs(color = "Lakes")
+
 PeterPaul_TP <- ggplot(PeterPaul, aes(x = as.factor(month), y = tp_ug, color = lakename)) + 
   geom_boxplot(show.legend = FALSE) +
-  xlab("Month") + ylab("TP")
+  xlab("Month") + ylab("TP") +
+  scale_color_manual(values = c("hotpink", "lightgreen"))
+
 PeterPaul_TN <- ggplot(PeterPaul, aes(x = as.factor(month), y = tn_ug, color = lakename)) + 
   geom_boxplot(show.legend = FALSE) +
-  xlab("Month") + ylab("TN")
+  xlab("Month") + ylab("TN") +
+  scale_color_manual(values = c("hotpink", "lightgreen"))
 
-#grab the legend
+#grab the legend from the first plot
 my.legend <- get_legend(PeterPaul_Temp)
 #now remove legend and replot without the legend
 PeterPaul_Temp <- PeterPaul_Temp + theme(legend.position = "none")
 #plot the grid
 plot_grid(PeterPaul_Temp, PeterPaul_TP, PeterPaul_TN, my.legend, 
-          ncol = 1, align = "vh", axis = "bt", rel_heights = c(1.25, 1))
-
-#plot_grid(PeterPaul_Temp, PeterPaul_Temp, PeterPaul_TN, nrow = 2, align = 'h', rel_heights = c(1.25, 1))
+          ncol = 2, align = "vh", axis = "b")
 ```
 
 Question: What do you observe about the variables of interest over seasons and between lakes? 
 
 > Answer: 
+The temperature for both lakes increases over the summer months, as we would expect. Temperature seems realtively consistent accross the two lakes, with the most noticeable difference happening in October (Peter Lake is much warmer). With TP, there are more noticeable differences. Peter Lake has noticeablely higher values throughout most of the year, except for May. There is some variability for both lakes across the year, although the trends are not consistent between lakes: Peter Lake seems to increase in TP value over the year, while Paul lake appears to decrease and increase over the year. For TN, values for both lakes seem to remain stable accross the year, with a loose trend for Peter Lake to increase over the year. Peter Lake tends to have higher median values than Paul Lake.
 
 6. [Niwot Ridge] Plot a subset of the litter dataset by displaying only the "Needles" functional group. Plot the dry mass of needle litter by date and separate by NLCD class with a color aesthetic. (no need to adjust the name of each land use)
+
 
 7. [Niwot Ridge] Now, plot the same plot but with NLCD classes separated into three facets rather than separated by color. 
 
 ```{r}
-#6
+#6plot with dry mass by date, with 
+ggplot(filter(Litter, functionalGroup == "Needles")) +
+  geom_col(aes(x = collectDate, y = dryMass, color = nlcdClass)) +
+  #sets the text on the x axis at an angle so it is readable.
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1)) +
+  #change label names
+  xlab("Collection Date") + ylab("Dry Mass") +
+  #Change the legend title; this code makes absolutely no sense
+  labs(color = "NLCD Classes")
 
-#7
-
-
+#7 Seconf plot, but with NLCD classes separated out in different plots
+ggplot(filter(Litter, functionalGroup == "Needles")) +
+  geom_col(aes(x = collectDate, y = dryMass)) +
+  facet_wrap(vars(nlcdClass), nrow = 3) + 
+  #sets the text on the x axis at an angle so it is readable.
+  theme(axis.text.x = element_text(angle = 45,  hjust = 1)) +
+  xlab("Collection Date") + ylab("Dry Mass") +
+  #Change the legend title; this code makes absolutely no sense
+  labs(color = "NLCD CLasses")
 ```
 Question: Which of these plots (6 vs. 7) do you think is more effective, and why? 
 
 > Answer:
+If we are interested in dry mass for different land covers, the second plot with facets is substantially more effective. By breaking the data up by landcover, it becomes easier to see the patterns for each type of cover over time. With the first graph, the nuances of change by cover type over the collection period are largely lost. But, if you were more interested in those collected values, and only had a passing interest in landcover, then it is possible that the first graph would work better. 
