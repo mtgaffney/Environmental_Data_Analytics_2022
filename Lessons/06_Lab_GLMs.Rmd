@@ -24,7 +24,7 @@ PeterPaul.chem.nutrients <- read.csv("./Data/Processed/NTL-LTER_Lake_Chemistry_N
 # Set date to date format
 PeterPaul.chem.nutrients$sampledate <- as.Date(PeterPaul.chem.nutrients$sampledate, format = "%Y-%m-%d")
 
-EPAair <- read.csv("./Data/Processed/EPAair_O3_PM25_NC1819_Processed.csv", stringsAsFactors = TRUE)
+EPAair <- read.csv("./Data/Processed/EPAair_O3_PM25_NC2021_Processed.csv", stringsAsFactors = TRUE)
 # Set date to date format
 EPAair$Date <- as.Date(EPAair$Date, format = "%Y-%m-%d")
 
@@ -67,11 +67,12 @@ Are Ozone levels below the threshold for "good" AQI index (0-50)?
 > Exercise 1: State the hypotheses for testing mean of AQI index.
 
 > Answer: 
+The null hypothesis is that the mean values are not below the threshold for good AQI index.
+The alternative hypothesis is that the values are below the threshold for the good AQI index.
 
 
 ```{r}
-
-
+#check the summary
 summary(EPAair$Ozone)
 EPAair.subsample <- sample_n(EPAair, 5000)
 
@@ -81,6 +82,7 @@ ggplot(EPAair, aes(x = Ozone)) +
   geom_histogram() 
 qqnorm(EPAair$Ozone); qqline(EPAair$Ozone)
 
+#now run t-test to see if the mean is different from a specific value.
 O3.onesample <- t.test(EPAair$Ozone, mu = 50, alternative = "less")
 O3.onesample
 
@@ -151,6 +153,25 @@ Create three plots, each with appropriately formatted axes and legends. Choose a
 
 ```{r}
 #Exercise 2:
+#adding the "fill" argument instead of "color"; and set year as a factor
+ggplot(EPAair, aes(x = Ozone, fill = as.factor(Year))) +
+  geom_density(alpha = 0.5) +
+  labs(Title = "hi",
+       #fill let's you change the legend!
+       fill = "Year") +
+  scale_fill_manual(values=c("red", "green"))
+
+ggplot(EPAair, aes(y = Ozone, x = as.factor(Year))) +
+  geom_boxplot() +
+  #this code lets you grab data from the data
+  stat_summary(geom = "text", fun.y = max, vjust = -1, size = 4,
+               label = c("a", "b"), color = "red")
+  
+#this code creates a violin plot
+ggplot(EPAair, aes(y = Ozone, x = as.factor(Year))) +
+  geom_violin(draw_quantiles = 0.5) +
+    stat_summary(geom = "text", fun.y = max, vjust = -1, size = 4,
+               label = c("a", "b"), color = "red")
 
 
 ```
@@ -164,12 +185,15 @@ For the NTL-LTER dataset, can we predict PM2.5 from Ozone?
 ```{r}
 
 #Exercise 3: Run a linear regression PM2.5 by Ozone. Find the p-value and R-squared value. 
+epa.lm <- lm(data = EPAair, PM2.5 ~ Ozone)
+summary(epa.lm)
 
 
-
-#Exercise 4: Build a scatterplot. Add a line and standard error for the linear regression. 
-
-
+#Exercise 4: Build a scatterplot. Add a line and standard error for the linear regression.
+ggplot(EPAair, aes(x=Ozone, y = PM2.5)) + 
+  geom_point() + 
+  geom_smooth(method = "lm", color = "deeppink") +
+  labs(title = "Does Ozone Explain PM2.5?")
 
 ```
 
@@ -181,13 +205,16 @@ What other variables can we add to improve model?
 ```{r}
 
 #Exercise 5: Build correlation plots and identify more possible explanatory variables to add to the regression.
-
-
-
+#first check for correlations
+epa_cor <- cor(EPAair %>% select(SITE_LATITUDE:PM2.5) %>% drop_na())
+corrplot(epa_cor, method = "ellipse")
 
 #Exercise 6: Choose a model by AIC in a Stepwise Algorithm. Do the results from AIC match the variables you selected on Exercise 5?
+epa.lm2 <- lm(data = EPAair, PM2.5 ~ Ozone + Year + Month + SITE_LATITUDE + SITE_LONGITUDE)
+summary(epa.lm2)
 
-
+#Run stepwise reduction function
+step(epa.lm2)
 
 
 #Exercise 7: Run another regression using the variables selected on Exercise 6. Compare r-squared value with the one from Exercise 5. 
