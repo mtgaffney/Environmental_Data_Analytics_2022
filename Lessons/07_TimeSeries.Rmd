@@ -235,14 +235,16 @@ wind_data_trend1 <- Kendall::SeasonalMannKendall(wind_data_ts)
 # Inspect results
 wind_data_trend1
 summary(wind_data_trend1)
+#low p-value, this means that we overturn the null-hypothesis that the data are stationary
+#we conclude that we have a trust
 
-
+#same analysis with a different statistical tool
 wind_data_trend2 <- trend::smk.test(wind_data_ts)
 # Inspect results
 wind_data_trend2
 summary(wind_data_trend2)
 
-#Visualization
+#Visualization with the original data
 wind_data_plot <-
 ggplot(wind_data, aes(x = DATE, y = AWND)) +
   geom_point() +
@@ -255,7 +257,7 @@ print(wind_data_plot)
 
 What would we conclude based on these findings? 
 
-> Answer:
+> Answer: There is a decrease trend in the average wind speed over time. We spotted this with the decomposition initially, but we were able to conclude this using the seasonal Mann-Kendall test.
 
 
 ## Forecasting with Autoregressive and Moving Average Models (ARMA)
