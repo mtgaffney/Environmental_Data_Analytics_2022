@@ -117,20 +117,15 @@ mapView(counties_sf, zcol = "AWATER")
 
 ```{r read HUCs shapefile}
 #Read the shapefile into an sf dataframe named "huc8_sf"
-
-
+huc8_sf <- st_read('./Data/Spatial/NCHUC8.shp')
 #Reveal the columns
-
-
+colnames(huc8_sf)
 #Check the CRS
-
-
+st_crs(huc8_sf)
 #Examine some records
-
-
+head(huc8_sf)
 #View the data as a map, colored by the acreage in each
-
-
+mapView(huc8_sf, zcol = "ACRES")
 ```
 
 ### 2.2.3 Challenge!
@@ -139,12 +134,15 @@ mapView(counties_sf, zcol = "AWATER")
 
 ```{r Select the Upper Neuse HUC 8}
 #Read the shapefile into an sf dataframe
-
+neuse_sf <- st_read('./Data/Spatial/NCHUC8.shp') %>% 
+  filter(SUBBASIN == "Upper Neuse")
 
 
 #Create a map
-
-
+ggplot() +
+  geom_sf(data = huc8_sf, fill = 'orange') +
+  geom_sf(data = neuse_sf, fill = 'purple')
+  
 ```
 
 ### 2.2.4 Reading in GeoJSON data
@@ -364,11 +362,11 @@ mapview(neuse_counties_sf, zcol='Area_m2')
 
 ```{r EXERCISE: Clipping}
 #Select the Triangle County from the 
-
-
-
-  
+triangle_co <- counties_sf_utm %>% 
+  filter(NAME %in% c("Chatham", "Durham", "Orange", "Wake"))
 #Grab the intersecting HUC_8s
+triangle_HUCs <- huc8_sf_utm %>% 
+  filter(st_intersects(x = ., y = triangle_co, sparse = F))
 
 
 
