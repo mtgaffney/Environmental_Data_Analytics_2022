@@ -76,6 +76,7 @@ st_crs(epa_pm25_sites_sf)$epsg
 #Plot the data
 ggplot(data=epa_pm25_sites_sf) +
   geom_sf()
+mapview(epa_pm25_sites_sf)
 ```
 
 ## 2.2 Reading shapefiles into R with `sf`
@@ -108,7 +109,7 @@ st_bbox(counties_sf)
 head(counties_sf)
 
 #Plot the data, colored by area of land in each county
-mapView(counties_sf, zcol = "AWATER")
+mapView(counties_sf, zcol = "ALAND")
 ```
 
 ### 2.2.2 Read in and explore 8-digit HUC watersheds for NC
@@ -138,10 +139,13 @@ neuse_sf <- st_read('./Data/Spatial/NCHUC8.shp') %>%
   filter(SUBBASIN == "Upper Neuse")
 
 
-#Create a map
+#Create a map using ggplot
 ggplot() +
   geom_sf(data = huc8_sf, fill = 'orange') +
   geom_sf(data = neuse_sf, fill = 'purple')
+
+#or same map but in map view
+mapView(huc8_sf, col.regions = "orange") + mapView(neuse_sf, col.regions = "purple")
   
 ```
 
@@ -203,7 +207,7 @@ We'll focus on just a few variables: Estimates of people in poverty ("E_POV") an
 #Read the 2018 SVI county-level dataset for NC
 svi2018_nc_raw <- read.csv(
   'https://svi.cdc.gov/Documents/Data/2018_SVI_Data/CSV/States_Counties/NorthCarolina_COUNTY.csv',
-  colClasses = c('FIPS' = 'factor')) %>% 
+  colClasses = c('FIPS' = 'factor')) %>% #this insures that you don't lost the preceding zero in the fips code; string as factor wouldn't work here.
   select(COUNTY, FIPS, LOCATION, E_TOTPOP, E_POV, E_MINRTY)
 
 #Check structure
