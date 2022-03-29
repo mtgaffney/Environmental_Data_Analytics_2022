@@ -202,7 +202,7 @@ df_withdrawals <- data.frame("Month" = rep(1:12),
 ggplot(df_withdrawals,aes(x=Date,y=Avg_Withdrawals_mgd)) + 
   geom_line() + 
   geom_smooth(method="loess",se=FALSE) +
-  labs(title = paste("2020 Water usage data for",the_registrant),
+  labs(title = paste(the_year, "Water usage data for",the_registrant),
        subtitle = the_facility_name,
        y="Withdrawal (mgd)",
        x="Date")
@@ -266,12 +266,12 @@ R can iterate using either "lapply" or Purrrs' "map" functions.
 the_years = rep(2018:2020)
 my_facility = '0004-0001'
 
-#Use lapply to apply the scrape function
+#Use lapply to apply the scrape function; this returns a list of dataframes
 the_dfs <- lapply(X = the_years,
                   FUN = scrape.it,
                   the_facility=my_facility)
 
-#OR, use purrr's map function
+#OR, use purrr's map function; does the same thing as lapply with tidyverse, mapping values onto functions
 the_dfs <- map(the_years,scrape.it,the_facility=my_facility)
 
 #Conflate the returned dataframes into a single dataframe
