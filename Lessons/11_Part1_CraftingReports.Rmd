@@ -65,10 +65,21 @@ See: <https://rmarkdown.rstudio.com> and class recording.
 
 <Fill in our discussion below with bullet points. Use italics and bold for emphasis (hint: use the cheat sheets or `Help` →`Markdown Quick Reference` to figure out how to make bold and italic text).> 
 
+* R Markdown is a convenient way to produce **aesthetically pleasing reports**.
+* R markdown operates through a **text language**, so it can be easy uploaded to github, unlike Microsoft products.
+* In a realted sense, it can therefore also be **easily shared**, which creates *greater transparency* in your analysis.
+* R Markdown can handle many **different coding languages**, like Python.
+  + This can be useful for projects that are more easily accomplished in another language due to the availability of packages.
+
 
 ## TEXT EDITING CHALLENGE
 
 Create a table below that details the example datasets we have been using in class. The first column should contain the names of the datasets and the second column should include some relevant information about the datasets. (Hint: use the cheat sheets to figure out how to make a table in Rmd)
+
+File Name                     | Description
+----------------------------- | -------------
+NWIS_SiteInfo_NE_RAW.csv      | NWIS Site Information
+NTL-LTER_Lake_Carbon_Raw.csv  | NTL LTER Lake: Carbon data
 
 
 ## R CHUNK EDITING CHALLENGE
@@ -76,15 +87,37 @@ Create a table below that details the example datasets we have been using in cla
 ### Installing packages
 
 Create an R chunk below that installs the package `knitr`. Instead of commenting out the code, customize the chunk options such that the code is not evaluated (i.e., not run).
+```{r install packages, eval=FALSE}
+install.packages("knitr")
+```
 
 
 ### Setup
 
 Create an R chunk below called "setup" that checks your working directory, loads the packages `tidyverse`, `lubridate`, and `knitr`, and sets a ggplot theme. Remember that you need to disable R throwing a message, which contains a check mark that cannot be knitted.
+```{r setup, message=FALSE}
+getwd()
+library(tidyverse)
+library(lubridate)
+library(knitr)
+
+#set the theme
+mytheme <- theme_dark() +
+  theme(axis.text = element_text(color = "black"), 
+        legend.position = "left")
+theme_set(mytheme)
+```
+
 
 Load the NTL-LTER_Lake_Nutrients_Raw dataset, display the head of the dataset, and set the date column to a date format.
 
 Customize the chunk options such that the code is run but is not displayed in the final document.
+```{r loading data, echo=FALSE}
+NTL.nutrients.data <- read.csv("../Data/Raw/NTL-LTER_Lake_Nutrients_Raw.csv", stringsAsFactors = TRUE)
+head(NTL.nutrients.data)
+NTL.nutrients.data$sampledate <- as.Date(NTL.nutrients.data$sampledate, format = "%m/%d/%y")
+```
+
 
 
 ### Data Exploration, Wrangling, and Visualization
@@ -94,17 +127,84 @@ Create an R chunk below to create a processed dataset do the following operation
 -   Include all columns except lakeid, depth_id, and comments
 -   Include only surface samples (depth = 0 m)
 -   Drop rows with missing data
+```{r}
+NTL.nutrients.final <- NTL.nutrients.data %>%
+  select(-c("lakeid", "depth_id", "comments")) %>%
+  filter(depth == 0) %>%
+  drop_na()
+```
+
 
 Create a second R chunk to create a summary dataset with the mean, minimum, maximum, and standard deviation of total nitrogen concentrations for each lake. Create a second summary dataset that is identical except that it evaluates total phosphorus. Customize the chunk options such that the code is run but not displayed in the final document.
+```{r}
+#summarize for nitrogen
+NTL.nutrients.nitrogen <- NTL.nutrients.final %>%
+  group_by(lakename) %>%
+  summarize(
+    mean_tn_ug = mean(tn_ug),
+    min_tn_ug = min(tn_ug),
+    max_tn_ug = max(tn_ug),
+    sd_tn_ug = sd(tn_ug)
+    )
+
+#summarize for phospherous 
+NTL.nutrients.phospherous <- NTL.nutrients.final %>%
+  group_by(lakename) %>%
+  summarize(
+    mean_tp_ug = mean(tp_ug),
+    min_tp_ug = min(tp_ug),
+    max_tp_ug = max(tp_ug),
+    sd_tp_ug = sd(tp_ug)
+    )
+```
+
 
 Create a third R chunk that uses the function `kable` in the knitr package to display two tables: one for the summary dataframe for total N and one for the summary dataframe of total P. Use the `caption = " "` code within that function to title your tables. Customize the chunk options such that the final table is displayed but not the code used to generate the table.
+```{r tables, echo=FALSE}
+#nitrogen tables
+kable(NTL.nutrients.nitrogen, caption = "Surface Samples: Total Nitrogen")
+#phospherous tables
+kable(NTL.nutrients.phospherous, caption = "Surface Samples: Total Phospherous")
+```
+
 
 Create a fourth and fifth R chunk that generates two plots (one in each chunk): one for total N over time with different colors for each lake, and one with the same setup but for total P. Decide which geom option will be appropriate for your purpose, and select a color palette that is visually pleasing and accessible. Customize the chunk options such that the final figures are displayed but not the code used to generate the figures. In addition, customize the chunk options such that the figures are aligned on the left side of the page. Lastly, add a fig.cap chunk option to add a caption (title) to your plot that will display underneath the figure.
+
+```{r nitrogen plot, echo=FALSE, warning=FALSE, fig.align='left', message = FALSE, fig.cap="Total Nitrogen"}
+#create the plot for the nitrogen
+ggplot(data = NTL.nutrients.final, aes(x = sampledate, y = tn_ug, color = lakename)) +
+  geom_point() +
+  geom_smooth(se=F) +
+  labs(
+    title ='Total N over time',
+    x = 'Date',
+    y = expression(paste('Total N (',mu,'g)')),
+    color = "Lake"
+    )
+```
+```{r r nitrogen plot, echo=FALSE, warning=FALSE, fig.align='left', message=FALSE, fig.cap="Total Phospherous"}
+#create for plot for the phospherous
+ggplot(data = NTL.nutrients.final, aes(x = sampledate, y = tp_ug, color = lakename)) +
+  geom_point() +
+  geom_smooth(se=F) +
+  labs(
+    title ='Total P over time',
+    x = 'Date',
+    y = expression(paste('Total P (',mu,'g)')),
+    color = "Lake"
+    )
+```
+
 
 
 ### Communicating results
 
-Write a paragraph describing your findings from the R coding challenge above. This should be geared toward an educated audience but one that is not necessarily familiar with the dataset. Then insert a horizontal rule below the paragraph. Below the horizontal rule, write another paragraph describing the next steps you might take in analyzing this dataset. What questions might you be able to answer, and what analyses would you conduct to answer those questions?
+*Write a paragraph describing your findings from the R coding challenge above. This should be geared toward an educated audience but one that is not necessarily familiar with the dataset. Then insert a horizontal rule below the paragraph. Below the horizontal rule, write another paragraph describing the next steps you might take in analyzing this dataset. What questions might you be able to answer, and what analyses would you conduct to answer those questions?*
+
+In the above plots, I analyzed the nitrogen and phosphorous content of 8 different lakes over time, from 1991 to 2000. These 8 lakes are part of a long term ecological research program (LTER); learning about the phosphorous and nitrogen content for these lakes can tell us a great deal about the overall health of lakes. In circumstances where lakes are affected by human development (either cities or agricultural production), they will often experience nutrient overloading, meaning that they will have more nutrients like phosphorous and nitrogen than they would in a natural state. This can lead to dramatically destabilized conditions in the lakes, like algal blooms that wipe out other wildlife. Looking at the nitrogen plot (figure 1), we can see that for East Long, West Long, and Peter Lake, there appears to be a general trend from 1991 to 1997 of increasing nitrogen content, which then appears to decrease in the years afterwards. The other lakes with sufficient data appear to have substantially more stable nitrogen measurements over time. Meanwhile, turning to the phosphorous plot (figure 2), East Long lake appears to display a similar trend in increasing phosphorous from 1991 to 1997, which then begins to decline. West Long and Peter lake show a slightly increasing trend, but not nearly as substantial. The other lakes do not appear to show a substantial trend. We might conclude that the lakes showing substantial change also had nearby land use changes.
+
+******
+With further analysis, several different questions could be answered about these lakes. We could, for example, ask whether or not the trend that is visible is statistically significant, or whether it is largely generated by random processes. This could be accomplished using a time series analysis. We could also ask whether there is a relationship between nitrogen and phosphorous content among the different lakes, which would involve constructing a linear model. With additional data, more robust questions could be asked. For example, with land use data, we could determine what types of changes are associated with the increasing trends. With species data, we could also ask what effect the increased nitrogen and phosphorous load has had.
 
 
 ## KNIT YOUR PDF
